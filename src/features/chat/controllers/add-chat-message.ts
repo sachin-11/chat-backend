@@ -14,11 +14,12 @@ import { IMessageData, IMessageNotification } from '@chat/interfaces/chat.interf
 import { INotificationTemplate } from '@notification/interfaces/notification.interface';
 import { notificationTemplate } from '@service/emails/templates/notifications/notification-template';
 import { emailQueue } from '@service/queues/email.queue';
-// import { MessageCache } from '@service/redis/message.cache';
-// import { chatQueue } from '@service/queues/chat.queue';
+import { socketIOChatObject } from '@socket/chat';
+import { MessageCache } from '@service/redis/message.cache';
+import { chatQueue } from '@service/queues/chat.queue';
 
 const userCache: UserCache = new UserCache();
-// const messageCache: MessageCache = new MessageCache();
+const messageCache: MessageCache = new MessageCache();
 
 export class Add {
   @joiValidation(addChatSchema)
@@ -68,7 +69,7 @@ export class Add {
       deleteForEveryone: false,
       deleteForMe: false
     };
-    // Add.prototype.emitSocketIOEvent(messageData);
+    Add.prototype.emitSocketIOEvent(messageData);
 
     if (!isRead) {
       Add.prototype.messageNotification({
@@ -80,30 +81,30 @@ export class Add {
       });
     }
 
-    // await messageCache.addChatListToCache(`${req.currentUser!.userId}`, `${receiverId}`, `${conversationObjectId}`);
-    // await messageCache.addChatListToCache(`${receiverId}`, `${req.currentUser!.userId}`, `${conversationObjectId}`);
-    // await messageCache.addChatMessageToCache(`${conversationObjectId}`, messageData);
-    // chatQueue.addChatJob('addChatMessageToDB', messageData);
+    await messageCache.addChatListToCache(`${req.currentUser!.userId}`, `${receiverId}`, `${conversationObjectId}`);
+    await messageCache.addChatListToCache(`${receiverId}`, `${req.currentUser!.userId}`, `${conversationObjectId}`);
+    await messageCache.addChatMessageToCache(`${conversationObjectId}`, messageData);
+    chatQueue.addChatJob('addChatMessageToDB', messageData);
 
     res.status(HTTP_STATUS.OK).json({ message: 'Message added', conversationId: conversationObjectId });
   }
 
-//   public async addChatUsers(req: Request, res: Response): Promise<void> {
-//     const chatUsers = await messageCache.addChatUsersToCache(req.body);
-//     socketIOChatObject.emit('add chat users', chatUsers);
-//     res.status(HTTP_STATUS.OK).json({ message: 'Users added'});
-//   }
+  public async addChatUsers(req: Request, res: Response): Promise<void> {
+    const chatUsers = await messageCache.addChatUsersToCache(req.body);
+    socketIOChatObject.emit('add chat users', chatUsers);
+    res.status(HTTP_STATUS.OK).json({ message: 'Users added'});
+  }
 
-//   public async removeChatUsers(req: Request, res: Response): Promise<void> {
-//     const chatUsers = await messageCache.removeChatUsersFromCache(req.body);
-//     socketIOChatObject.emit('add chat users', chatUsers);
-//     res.status(HTTP_STATUS.OK).json({ message: 'Users removed'});
-//   }
+  public async removeChatUsers(req: Request, res: Response): Promise<void> {
+    const chatUsers = await messageCache.removeChatUsersFromCache(req.body);
+    socketIOChatObject.emit('add chat users', chatUsers);
+    res.status(HTTP_STATUS.OK).json({ message: 'Users removed'});
+  }
 
-//   private emitSocketIOEvent(data: IMessageData): void {
-//     socketIOChatObject.emit('message received', data);
-//     socketIOChatObject.emit('chat list', data);
-//   }
+  private emitSocketIOEvent(data: IMessageData): void {
+    socketIOChatObject.emit('message received', data);
+    socketIOChatObject.emit('chat list', data);
+  }
 
   private async messageNotification({ currentUser, message, receiverName, receiverId }: IMessageNotification): Promise<void> {
     const cachedUser: IUserDocument = await userCache.getUserFromCache(`${receiverId}`) as IUserDocument;
