@@ -48,7 +48,7 @@ Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/chat/message/user/62f29f71da585226216b2724
+GET {{baseUrl}}/{{urlPath}}/chat/message/user/64d7e19fda8e57d5b82e0f76
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
@@ -77,8 +77,8 @@ Accept: application/json
 withCredentials: true
 
 {
-  "conversationId": "62f7d664126558835a734ebc",
-  "messageId": "62f8bb615bde3fdef34eae82",
+  "conversationId": "64dbd17eed30a1b3bf0cc88b",
+  "messageId": "64dbd17eed30a1b3bf0cc88a",
   "reaction": "like",
   "type": "add"
 }
