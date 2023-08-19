@@ -2,6 +2,7 @@ import { FollowerModel } from '@follower/models/follower.schema';
 import { UserModel } from '@user/models/user.schema';
 import { ObjectId, BulkWriteResult } from 'mongodb';
 import mongoose, { Query } from 'mongoose';
+import { map } from 'lodash';
 import { IFollowerData, IFollowerDocument } from '@follower/interfaces/follower.interface';
 import { IQueryDeleted, IQueryComplete } from '@post/interfaces/post.interface';
 import { IUserDocument } from '@user/interfaces/user.interface';
@@ -166,6 +167,20 @@ class FollowerService {
     ]);
     return follower;
   }
+
+  public async getFolloweesIds(userId: string): Promise<string[]> {
+    const followee = await FollowerModel.aggregate([
+      { $match: { followerId: new mongoose.Types.ObjectId(userId)}},
+      {
+        $project: {
+          followeeId: 1,
+          _id: 0
+        }
+      }
+    ]);
+    return map(followee, (result) => result.followeeId.toString());
+  }
+
 }
 
 export const followerService: FollowerService = new FollowerService();
