@@ -12,6 +12,7 @@ import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import Logger from 'bunyan';
 import applicationRoutes from '@root/routes';
+import apiStats from 'swagger-stats';
 import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
 import { config } from '@root/config';
 import { SocketIOPostHandler } from '@socket/post';
@@ -35,7 +36,7 @@ export class ChattyServer {
     this.securityMiddleware(this.app);
     this.standardMiddleware(this.app);
     this.routesMiddleware(this.app);
-    // this.apiMonitoring(this.app);
+    this.apiMonitoring(this.app);
     this.globalErrorHandler(this.app);
     this.startServer(this.app);
   }
@@ -87,9 +88,9 @@ export class ChattyServer {
   }
 
   private async startServer(app: Application): Promise<void> {
-    // if (!config.JWT_TOKEN) {
-    //   throw new Error("JWT_TOKEN must be provided");
-    // }
+    if (!config.JWT_TOKEN) {
+      throw new Error("JWT_TOKEN must be provided");
+    }
     try {
       const httpServer: http.Server = new http.Server(app);
       const socketIO: Server = await this.createSocketIO(httpServer);
@@ -113,7 +114,13 @@ export class ChattyServer {
     return io;
   }
 
-  // private apiMonitoring(app: Application): void {}
+  private apiMonitoring(app: Application): void {
+    app.use(
+      apiStats.getMiddleware({
+        uriPath: '/api-monitoring'
+      })
+    );
+  }
 
   private startHttpServer(httpServer: http.Server): void {
     log.info(`Worker with process id of ${process.pid} has started...`);
