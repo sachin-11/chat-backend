@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=production pm2 start ./build/src/app.js -i 5 --attach --watch | ./node_modules/.bin/bunyan",
+    "start": "NODE_ENV=production pm2 start ./build/src/app.js -i 5 --attach --watch -f | ./node_modules/.bin/bunyan",
     "stop": "pm2 stop all",
     "delete": "pm2 delete all",
     "dev": "nodemon -r tsconfig-paths/register src/app.ts | ./node_modules/.bin/bunyan",
@@ -67,6 +67,7 @@
     "@types/lodash": "^4.14.197",
     "@types/node": "^20.4.4",
     "@types/nodemailer": "^6.4.9",
+    "@types/redis-info": "^3.0.0",
     "@types/swagger-stats": "^0.95.8",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
@@ -75,6 +76,7 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
+    "tsc-alias": "^1.8.7",
     "tsconfig-paths": "^4.2.0"
   }
 }
